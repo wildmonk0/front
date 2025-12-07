@@ -258,19 +258,20 @@ function Dashboard({ onLogout }) {
     }
   };
   
- const downloadResults = async () => {
+const downloadResults = async () => {
   try {
     if (!results) {
       alert("No results to download.");
       return;
     }
 
-    if (!auth || !auth.access_token) {
+    // ✅ use the same token the rest of the app uses
+    if (!auth || !auth.session_token) {
       alert("You need to be logged in to download results.");
       return;
     }
 
-    const token = auth.access_token;
+    const token = auth.session_token;
 
     const res = await axios.get(
       `${API_URL}/api/results/${results.result_id}/download`,
@@ -278,9 +279,28 @@ function Dashboard({ onLogout }) {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        responseType: "blob", // tell axios we're expecting a file
+        responseType: "blob", // expecting a file
       }
     );
+
+    const blob = new Blob([res.data], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "rnse_results.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error(err);
+    alert(
+      err.response?.data?.detail ||
+      "Failed to download results. Check console for details."
+    );
+  }
+};
+
 
     // Create a file blob and auto-download
     const blob = new Blob([res.data], { type: "text/csv" });
