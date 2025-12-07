@@ -8,46 +8,64 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 // Authentication Context
 // ============================================================================
 
+import React, { useState, useEffect, useContext } from "react";
+import axios from "axios";
+
 const AuthContext = React.createContext(null);
 
 export function AuthProvider({ children }) {
-  const [auth, setAuth] = useAuth();
-  
+  const [auth, setAuth] = useState(null);
+
   useEffect(() => {
-    const saved = localStorage.getItem('auth');
+    const saved = localStorage.getItem("auth");
     if (saved) setAuth(JSON.parse(saved));
   }, []);
-  
+
   const login = async (email, password) => {
-    const res = await axios.post(`${API_URL}/api/auth/login`, { email, password });
+    const res = await axios.post(`${API_URL}/api/auth/login`, {
+      email,
+      password
+    });
+
     const authData = res.data;
-    localStorage.setItem('auth', JSON.stringify(authData));
+    localStorage.setItem("auth", JSON.stringify(authData));
     setAuth(authData);
     return authData;
   };
-  
+
   const signup = async (email, password) => {
-    const res = await axios.post(`${API_URL}/api/auth/signup`, { email, password });
+    const res = await axios.post(`${API_URL}/api/auth/signup`, {
+      email,
+      password
+    });
+
     const authData = res.data;
-    localStorage.setItem('auth', JSON.stringify(authData));
+    localStorage.setItem("auth", JSON.stringify(authData));
     setAuth(authData);
     return authData;
   };
-  
+
   const logout = () => {
-    localStorage.removeItem('auth');
+    localStorage.removeItem("auth");
     setAuth(null);
   };
-  
+
+  const value = {
+    auth,
+    login,
+    signup,
+    logout
+  };
+
   return (
-    <AuthContext.Provider value={{ auth, login, signup, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-function useAuth() {
-  return React.useContext(AuthContext);
+export function useAuth() {
+  return useContext(AuthContext);
 }
 
 // ============================================================================
