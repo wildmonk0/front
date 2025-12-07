@@ -301,24 +301,6 @@ const downloadResults = async () => {
   }
 };
 
-
-    // Create a file blob and auto-download
-    const blob = new Blob([res.data], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "rnse_results.csv";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(url);
-
-  } catch (err) {
-    console.error(err);
-    alert("Failed to download results. Check console for details.");
-  }
-};
-
   
   return (
     <div className="dashboard">
